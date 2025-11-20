@@ -1,0 +1,118 @@
+version: 2
+
+models:
+  - name: fact_orders
+    description: |
+      Order-level fact table aggregating multiple line items into single order records.
+      Designed for order-level analysis and reporting. Each row represents one complete order
+      with calculated totals for price, freight, and product counts.
+    columns:
+      - name: order_key
+        description: "MD5 hash surrogate key generated from order_id for data warehouse purposes"
+        tests:
+          - unique
+          - not_null
+      - name: order_id
+        description: "Natural key - unique order identifier from source system"
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Foreign key to dim_customers table"
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_id
+      - name: customer_city
+        description: "City where the customer is located (denormalized for query performance)"
+      - name: customer_state
+        description: "Brazilian state code (e.g., SP, RJ, MG)"
+        tests:
+          - not_null
+      - name: order_date
+        description: "Order placement timestamp - MIN(event_timestamp) from all order events"
+        tests:
+          - not_null
+      - name: total_price
+        description: "Sum of all product prices in the order (excludes freight)"
+        tests:
+          - not_null
+      - name: total_freight
+        description: "Sum of all shipping costs for the order"
+        tests:
+          - not_null
+      - name: total_payment
+        description: "Total amount paid for the order (may differ from total_price due to discounts/fees)"
+        tests:
+          - not_null
+      - name: order_status
+        description: "Most recent order status (MAX value from order events)"
+      - name: num_products
+        description: "Count of distinct products in this order"
+        tests:
+          - not_null
+      - name: order_date_key
+        description: "Date component of order_date for efficient date filtering and joins"
+        tests:
+          - not_null
+
+  - name: dim_customers
+    description: |
+      Customer dimension table with one row per unique customer.
+      Includes aggregated lifetime metrics for customer analysis.
+      Type 1 slowly changing dimension - updates overwrite previous values.
+    columns:
+      - name: customer_key
+        description: "MD5 hash surrogate key generated from customer_id"
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: "Natural key - unique customer identifier from source system"
+        tests:
+          - unique
+          - not_null
+      - name: customer_city
+        description: "City where the customer is located"
+      - name: customer_state
+        description: "Brazilian state code where customer resides"
+        tests:
+          - not_null
+      - name: total_orders
+        description: "Lifetime count of orders placed by this customer (calculated across all historical data)"
+        tests:
+          - not_null
+
+  - name: agg_daily_revenue
+    description: |
+      Pre-aggregated daily revenue metrics by state for dashboard performance optimization.
+      Designed to power real-time dashboards without scanning the full fact table.
+      Grain: one row per date per state combination.
+    columns:
+      - name: date
+        description: "Order date at day granularity (YYYY-MM-DD)"
+        tests:
+          - not_null
+      - name: customer_state
+        description: "Brazilian state code (e.g., SP for São Paulo, RJ for Rio de Janeiro)"
+        tests:
+          - not_null
+      - name: num_orders
+        description: "Count of distinct orders placed on this date in this state"
+        tests:
+          - not_null
+      - name: total_revenue
+        description: "Sum of all order values (total_price) for this date/state, excluding freight"
+        tests:
+          - not_null
+      - name: total_freight
+        description: "Sum of all shipping costs for this date/state"
+        tests:
+          - not_null
+      - name: avg_order_value
+        description: "Average order value (total_revenue / num_orders) for this date/state"
+      - name: total_products_sold
+        description: "Sum of all products sold across orders for this date/state"
+        tests:
+          - not_null

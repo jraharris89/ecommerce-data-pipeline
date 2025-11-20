@@ -1,0 +1,94 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+*.log
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Environment variables
+.env
+.env.local
+*.env
+
+# Airflow
+airflow/logs/
+airflow/plugins/
+airflow/*.pid
+airflow/*.log
+airflow/*.db
+airflow/airflow.cfg
+airflow/webserver_config.py
+airflow/airflow-webserver.pid
+airflow/standalone_admin_password.txt
+
+# DBT
+dbt/logs/
+dbt/target/
+dbt/dbt_packages/
+dbt/.user.yml
+
+# Data files (excluding raw source data)
+data/processed/*
+!data/processed/.gitkeep
+*.csv.gz
+*.parquet
+*.db
+*.sqlite
+
+# Docker
+.dockerignore
+
+# Kafka
+kafka/data/
+kafka/logs/
+
+# Database
+*.sql
+postgres_data/
+
+# MacOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Streamlit
+streamlit/.streamlit/secrets.toml
+
+# Temporary files
+*.tmp
+*.bak
+*.cache
